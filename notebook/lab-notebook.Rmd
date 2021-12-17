@@ -1,0 +1,339 @@
+---
+title: "Lab notebook - Dec 2021-May 2022"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author: "Michael Jahn"
+output:
+  html_notebook:
+    theme: cosmo
+    toc: yes
+    toc_depth: 1
+    number_sections: false
+---
+
+# Preface
+
+Lab notebook for December 2021 to May 2022. Previous lab books are in paper form.
+Low compexity lab data is directly added to this notebook and visualized. For this purpose, some R libraries are loaded.
+
+```{r}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(lattice)
+  library(latticeExtra)
+  library(latticetools)
+})
+```
+
+Set default experiments directory.
+
+```{r}
+dir_exp = "~/Documents/SciLifeLab/Experiments/"
+```
+
+Convenience functions for different charts.
+
+```{r}
+plot_barchart <- function(df, xvar, yvar, xlim = NULL, ylim = NULL, offset = NULL, ...) {
+  scales = list(alternating = FALSE, x = list(limits = xlim), y = list(limits = ylim))
+  xyplot(get(yvar) ~ factor(get(xvar), unique(get(xvar))), df,
+    par.settings = custom.colorblind(),
+    xlab = xvar, ylab = yvar, offset = offset,
+    scales = scales,
+    panel = function(x, y, ...) {
+      panel.grid(h = -1, v = -1, col = grey(0.9))
+      panel.barplot(x, y, ...)
+      panel.pvalue(x, y, ...)
+    }
+  )
+}
+
+plot_OD <- function(df, ...) {
+  xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)),
+    filter(df, od_led == 720), type = "l", lwd = 2,
+    groups = channel_id, as.table = TRUE, layout = c(4, 1),
+    between = list(x = 0.5, y = 0.5),
+    ylab = expression("OD"[600]),
+    par.settings = custom.colorblind(),
+    scales = list(alternating = FALSE),
+    panel = function(x, y, ...) {
+      panel.grid(h = -1, v = -1, col = grey(0.9))
+      panel.xyplot(x, y, ...)
+    }
+  )
+}
+
+plot_MU <- function(df, ...) {
+  xyplot(value ~ batchtime_h | factor(sample, unique(sample)),
+    df, type = "l", lwd = 2,
+    groups = channel_id, as.table = TRUE, layout = c(4, 1),
+    between = list(x = 0.5, y = 0.5),
+    ylab = expression("µ [h"^-1*"]"),
+    par.settings = custom.colorblind(),
+    scales = list(alternating = FALSE),
+    panel = function(x, y, ...) {
+      panel.grid(h = -1, v = -1, col = grey(0.9))
+      panel.xyplot(x, y, ...)
+    }
+  )
+}
+```
+
+# 2021-12-03
+
+## Shipment of TnLib samples to JBEI
+
+- samples were picked up from a courier from YSDS (15:00)
+- content: 4 x 1 mL aliquots of TnLib, -80*C
+- sent on 10-20 kg dry ice, estimated delivery in 4 days
+- tested viability by plating 10 µL of 1:10, 1:100, 1:1000 dilutions
+- viability was higher than expected, around 5x10^4 CFU/µL (before freezing!)
+- colony morphology was 100% *Ralstonia*
+
+
+## MC2 cultivation of hox/hyp mutants
+
+- stopped cultivation after 48 h
+- measured external OD
+- harvested 45 mL, washed with mqH2O, and determined DCW by drying ON at 55*C
+- refilled MC2 tubes with 50 mL fresh MM + 2 g/L glc + 1 g/L NH4Cl
+- follow growth and determine mu max
+
+
+# 2021-12-06
+
+## Results MC2 cultivation of hox/hyp mutants
+
+- finished second batch cultivation: not useful to determine yield/growth rate differences because cells were in different growth states or density when starting (just filled up new medium, instead of restarting properly)
+- measured DCW, yield and OD/growth rate of first batch growth experiment, see results below
+
+**Table: final DCW and biomass yield of 1st batch cultivation**
+
+```{r}
+df_DCW_20211206 <- data.frame(
+    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    tube_weight_mg = c(991.43, 999.80, 991.03, 1000.94, 995.92, 990.10, 998.16, 1013.17),
+    total_weight_mg = c(1024.33, 1034.47, 1024.12, 1034.80, 1025.28, 1019.30, 1027.56, 1041.40),
+    final_OD600 = c(0.496, 0.548, 0.480, 0.513, 0.480, 0.452, 0.473, 0.461)
+  ) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
+
+df_DCW_20211206
+```
+
+**Figure: biomass yield of 1st batch cultivation**
+
+```{r, fig.height = 3, fig.width = 6}
+plot_barchart(df_DCW_20211206, xvar = "sample", yvar = "yield_gDCW_gFRC", ylim = c(0, 0.4)) %>%
+  print(split = c(1,1,2,1), more = TRUE)
+plot_barchart(df_DCW_20211206, xvar = "sample", yvar = "final_OD600", ylim = c(0, 0.6)) %>%
+  print(split = c(2,1,2,1), more = TRUE)
+```
+
+**Figure: comparison of growth rate for MC batch cultivation**
+
+```{r}
+df_OD_20211206 <- read_csv(paste0(dir_exp, "20211201_MC2_batch_mutants/20211201_MC2_measurements.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB"))
+
+df_mu_20211206 <- read_csv(paste0(dir_exp, "20211201_MC2_batch_mutants/MU.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB"))
+```
+
+```{r, fig.height = 5, fig.width = 6}
+print(plot_OD(df_OD_20211206), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211206), split = c(1,2,1,2), more = TRUE)
+```
+
+**Direct comparison of maximum growth rate**
+
+```{r, fig.height = 3, fig.width = 3}
+df_mu_20211206 %>% filter(batchtime_h > 5) %>%
+  group_by(sample, channel_id) %>%
+  summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart(xvar = "sample", yvar = "mu_max", ylim = c(0, 0.3), offset = 0.05)
+```
+**Conclusion**
+
+- growth and/or yield difference between WT and hydrogenase mutants seems to be marginal
+- plate reader experiments gave hints that mutants _could_ grow faster, but as of yet inconclusive
+- minimal medium stock that was used for MC showed cloudiness over night --> contamination
+- discarded MM, prepared fresh medium, need to repeat MC experiment
+
+## Preparations to redo MC2 cultivation of hox/hyp mutants
+
+- goal: get more growth rate/yield data, start with lower OD to have adaptation phase happening early during cultivation, and optimally adapted cells in exp. phase
+- started precultures for WT, hoxA, hypX, hypB1, 5 mL fresh MM + 2 g/L Frc
+- prepared and autoclaved fresh set of reactor tubes
+
+# 2021-12-08
+
+## Redo experiment batch growth of hox/hyp mutants
+
+- repetition of previous [experiment from 2021-12-03](#2021-12-03)
+- started MC2 with 4 strains, 2 biological replicates
+- fresh MM + 2 g/L Frc, + 1 g/L NH4Cl
+- aeration: 100 mL/min for all tubes
+- temp = 30*C
+- t_start = 11:00
+- precultures:
+
+```{r}
+tibble(
+    strain = c("WT", "hoxA1", "hypX", "hypB1"),
+    OD600_diluted = c(0.527, 0.620, 0.612, 0.528)
+  ) %>%
+  mutate(
+    OD600 = OD600_diluted*4,
+    V_for_OD_0.005 = 0.005/OD600,
+    V_for_50_mL = V_for_OD_0.005*50
+  )
+```
+# 2021-12-10
+
+## Results MC2 cultivation of hox/hyp mutants
+
+- starting with lower OD was a useful strategy: longer exp growth phase
+- contrary to previous results, hox A did not grow faster but had longer log phase (preculture old?)
+- measured DCW, yield and OD/growth rate
+
+**Table: final DCW and biomass yield of 2nd batch cultivation**
+
+```{r}
+df_DCW_20211208 <- data.frame(
+    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    tube_weight_mg = c(1001.09, 1001.16, 995.67, 999.15, 1004.55, 996.51, 1000.24, 1001.17),
+    total_weight_mg = c(1042.51, 1042.32, 1036.17, 1039.34, 1048.91, 1039.44, 1038.18, 1038.96)
+  ) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
+
+df_DCW_20211208
+```
+**Figure: biomass yield of 2nd batch cultivation**
+
+```{r, fig.height = 3, fig.width = 3}
+plot_barchart(df_DCW_20211208, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1)
+```
+
+**Figure: comparison of growth rate for MC batch cultivation**
+
+```{r}
+df_OD_20211208 <- read_csv(paste0(dir_exp, "20211208_MC2_batch_mutants/20211208_MC2_measurements.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB"))
+
+df_mu_20211208 <- read_csv(paste0(dir_exp, "20211208_MC2_batch_mutants/MU.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB")) %>%
+  filter(value <= 0.4)
+```
+
+```{r, fig.height = 5, fig.width = 6}
+print(plot_OD(df_OD_20211208), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211208), split = c(1,2,1,2), more = TRUE)
+```
+
+**Direct comparison of maximum growth rate**
+
+```{r, fig.height = 3, fig.width = 3}
+df_mu_20211208 %>% filter(batchtime_h > 5) %>%
+  group_by(sample, channel_id) %>%
+  summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07)
+```
+
+# 2021-12-14
+
+## Redo experiment batch growth of hox/hyp mutants
+
+- repetition of previous [experiment from 2021-12-08](#2021-12-08)
+- started MC2 with 4 strains, 2 biological replicates
+- MM + 2 g/L Frc, + 1 g/L NH4Cl
+- aeration: 100 mL/min for all tubes
+- temp = 30*C
+- t_start = 15:00
+- precultures: 10 mL shake flask, MM + 2g/L Frc, 24h growth
+- use very low starting OD as last time
+
+```{r}
+tibble(
+    strain = c("WT", "hoxA1", "hypX", "hypB1"),
+    OD600_diluted = c(0.564, 0.524, 0.635, 0.552)
+  ) %>%
+  mutate(
+    OD600 = OD600_diluted*4,
+    V_for_OD_0.005 = 0.005/OD600,
+    V_for_50_mL = V_for_OD_0.005*50
+  )
+```
+
+# 2021-12-14
+
+## Results MC2 cultivation of hox/hyp mutants
+
+- repetition of previous experiment from 2021-12-08
+- hoxA had again a longer log phase than expected --> repeat
+- measured DCW, yield and OD/growth rate
+
+**Table: final DCW and biomass yield of 2nd batch cultivation**
+
+```{r}
+df_DCW_20211214 <- data.frame(
+    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    tube_weight_mg = c(995.67, 1005.26, 991.10, 991.57, 999.35, 995.96, 991.55, 1011.39),
+    total_weight_mg = c(1036.95, 1047.52, 1034.38, 1033.41, 1044.10, 1040.03, 1031.33,1051.77)
+  ) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
+
+df_DCW_20211214
+```
+
+**Figure: biomass yield of 2nd batch cultivation**
+
+```{r, fig.height = 3, fig.width = 3}
+plot_barchart(df_DCW_20211214, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1)
+```
+
+**Figure: comparison of growth rate for MC batch cultivation**
+
+```{r}
+df_OD_20211214 <- read_csv(paste0(dir_exp, "20211214_MC2_batch_mutants/20211214_MC2_measurements.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB"))
+
+df_mu_20211214 <- read_csv(paste0(dir_exp, "20211214_MC2_batch_mutants/MU.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  mutate(sample = case_when(channel_id %in% 1:2 ~ "WT", channel_id %in% 3:4 ~ "hoxA",
+    channel_id %in% 5:6 ~ "hypX", channel_id %in% 7:8 ~ "hypB"))
+```
+
+```{r, fig.height = 5, fig.width = 6}
+print(plot_OD(df_OD_20211214), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211214), split = c(1,2,1,2), more = TRUE)
+```
+
+**Direct comparison of maximum growth rate**
+
+```{r, fig.height = 3, fig.width = 3}
+df_mu_20211214 %>% filter(batchtime_h > 5) %>%
+  group_by(sample, channel_id) %>% summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07)
+```
