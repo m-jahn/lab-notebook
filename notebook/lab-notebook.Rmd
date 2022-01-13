@@ -36,12 +36,14 @@ Convenience functions for different charts.
 plot_barchart <- function(df, xvar, yvar, xlim = NULL, ylim = NULL, offset = NULL, ...) {
   scales = list(alternating = FALSE, x = list(limits = xlim), y = list(limits = ylim))
   xyplot(get(yvar) ~ factor(get(xvar), unique(get(xvar))), df,
-    par.settings = custom.colorblind(),
+    par.settings = custom.colorblind(), fill = "white", lwd = 2,
     xlab = xvar, ylab = yvar, offset = offset,
     scales = scales,
     panel = function(x, y, ...) {
       panel.grid(h = -1, v = -1, col = grey(0.9))
       panel.barplot(x, y, ...)
+      panel.stripplot(x, y, cex = 0.6, jitter.data = TRUE,
+        horizontal = FALSE, alpha = 0.5, ...)
       panel.pvalue(x, y, ...)
     }
   )
@@ -219,13 +221,8 @@ df_DCW_20211208 <- data.frame(
 
 df_DCW_20211208
 ```
-**Figure: biomass yield of 2nd batch cultivation**
 
-```{r, fig.height = 3, fig.width = 3}
-plot_barchart(df_DCW_20211208, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1)
-```
-
-**Figure: comparison of growth rate for MC batch cultivation**
+**Comparison of growth rate for MC batch cultivation**
 
 ```{r}
 df_OD_20211208 <- read_csv(paste0(dir_exp, "20211208_MC2_batch_mutants/20211208_MC2_measurements.csv"),
@@ -245,14 +242,18 @@ print(plot_OD(df_OD_20211208), split = c(1,1,1,2), more = TRUE)
 print(plot_MU(df_mu_20211208), split = c(1,2,1,2), more = TRUE)
 ```
 
-**Direct comparison of maximum growth rate**
+**Comparison of maximum growth rate and yield**
 
-```{r, fig.height = 3, fig.width = 3}
+```{r, fig.height = 3, fig.width = 6}
+plot_barchart(df_DCW_20211208, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
 df_mu_20211208 %>% filter(batchtime_h > 5) %>%
   group_by(sample, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
   arrange(channel_id) %>%
-  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07)
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  print(position = c(0.5,0,1,1), more = TRUE)
 ```
 
 # 2021-12-14
@@ -288,7 +289,7 @@ tibble(
 - hoxA had again a longer log phase than expected --> repeat
 - measured DCW, yield and OD/growth rate
 
-**Table: final DCW and biomass yield of 2nd batch cultivation**
+**Final DCW and biomass yield of 2nd batch cultivation**
 
 ```{r}
 df_DCW_20211214 <- data.frame(
@@ -304,13 +305,7 @@ df_DCW_20211214 <- data.frame(
 df_DCW_20211214
 ```
 
-**Figure: biomass yield of 2nd batch cultivation**
-
-```{r, fig.height = 3, fig.width = 3}
-plot_barchart(df_DCW_20211214, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1)
-```
-
-**Figure: comparison of growth rate for MC batch cultivation**
+**Comparison of growth rate for MC batch cultivation**
 
 ```{r}
 df_OD_20211214 <- read_csv(paste0(dir_exp, "20211214_MC2_batch_mutants/20211214_MC2_measurements.csv"),
@@ -329,11 +324,34 @@ print(plot_OD(df_OD_20211214), split = c(1,1,1,2), more = TRUE)
 print(plot_MU(df_mu_20211214), split = c(1,2,1,2), more = TRUE)
 ```
 
-**Direct comparison of maximum growth rate**
+**Comparison of maximum growth rate and yield**
 
-```{r, fig.height = 3, fig.width = 3}
+```{r, fig.height = 3, fig.width = 6}
+plot_barchart(df_DCW_20211214, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
 df_mu_20211214 %>% filter(batchtime_h > 5) %>%
   group_by(sample, channel_id) %>% summarize(mu_max = max(value), .groups = "drop") %>%
   arrange(channel_id) %>%
-  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07)
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  print(position = c(0.5,0,1,1))
 ```
+
+# 2022-01-11
+
+## Hox genes: overview of all relevant cultivations so far
+
+```{r, fig.height = 3, fig.width = 6}
+bind_rows(df_DCW_20211208, df_DCW_20211214) %>%
+  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
+df_mu_20211208 %>% filter(batchtime_h > 5) %>%
+  bind_rows(df_mu_20211214, .id = "experiment") %>%
+  group_by(sample, experiment, channel_id) %>%
+  summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  print(position = c(0.5,0,1,1), more = TRUE)
+```
+
