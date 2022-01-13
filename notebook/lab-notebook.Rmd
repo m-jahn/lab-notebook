@@ -355,3 +355,16 @@ df_mu_20211208 %>% filter(batchtime_h > 5) %>%
   print(position = c(0.5,0,1,1), more = TRUE)
 ```
 
+## Hox genes: New cultivations
+
+- previous hoxA cultivations in MC did not show promising µ increase as shown in plate reader pre-experiments
+- maybe precultures were not viable or contaminated; to finalize hoxA analysis, cultivation is redone with 4 replicates
+- prepared precultures 3x 5 mL flask with MM + 2 g/L Frc and 1 g/L NH4Cl
+- inoculated: delta hoxA, hoxH, hoxG (did not grow, plate old)
+
+# 2022-01-13
+
+- hoxA and hoxH precultures have grown
+- prepared MC2 batch cultivation as before, without WT
+- setup: 4x hoxA, 4x hoxH, alternating order in MC (A, H, A, H, ...)
+
