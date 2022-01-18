@@ -115,7 +115,7 @@ plot_MU <- function(df, groups = NULL, ...) {
 
 ```{r}
 df_DCW_20211206 <- data.frame(
-    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    sample = rep(c("WT", "hoxA", "hypX", "hypB"), each = 2),
     tube_weight_mg = c(991.43, 999.80, 991.03, 1000.94, 995.92, 990.10, 998.16, 1013.17),
     total_weight_mg = c(1024.33, 1034.47, 1024.12, 1034.80, 1025.28, 1019.30, 1027.56, 1041.40),
     final_OD600 = c(0.496, 0.548, 0.480, 0.513, 0.480, 0.452, 0.473, 0.461)
@@ -194,7 +194,7 @@ df_mu_20211206 %>% filter(batchtime_h > 5) %>%
 
 ```{r}
 tibble(
-    strain = c("WT", "hoxA1", "hypX", "hypB1"),
+    strain = c("WT", "hoxA", "hypX", "hypB"),
     OD600_diluted = c(0.527, 0.620, 0.612, 0.528)
   ) %>%
   mutate(
@@ -215,7 +215,7 @@ tibble(
 
 ```{r}
 df_DCW_20211208 <- data.frame(
-    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    sample = rep(c("WT", "hoxA", "hypX", "hypB"), each = 2),
     tube_weight_mg = c(1001.09, 1001.16, 995.67, 999.15, 1004.55, 996.51, 1000.24, 1001.17),
     total_weight_mg = c(1042.51, 1042.32, 1036.17, 1039.34, 1048.91, 1039.44, 1038.18, 1038.96)
   ) %>%
@@ -278,7 +278,7 @@ df_mu_20211208 %>% filter(batchtime_h > 5) %>%
 
 ```{r}
 tibble(
-    strain = c("WT", "hoxA1", "hypX", "hypB1"),
+    strain = c("WT", "hoxA", "hypX", "hypB"),
     OD600_diluted = c(0.564, 0.524, 0.635, 0.552)
   ) %>%
   mutate(
@@ -300,7 +300,7 @@ tibble(
 
 ```{r}
 df_DCW_20211214 <- data.frame(
-    sample = rep(c("WT", "hoxA1", "hypX", "hypB1"), each = 2),
+    sample = rep(c("WT", "hoxA", "hypX", "hypB"), each = 2),
     tube_weight_mg = c(995.67, 1005.26, 991.10, 991.57, 999.35, 995.96, 991.55, 1011.39),
     total_weight_mg = c(1036.95, 1047.52, 1034.38, 1033.41, 1044.10, 1040.03, 1031.33,1051.77)
   ) %>%
@@ -368,8 +368,8 @@ df_mu_20211214 %>% filter(batchtime_h > 5) %>%
 ## Hox genes: new cultivation with hoxA and hoxH
 
 - cultivation finished without problems
-- hoxA slightly higher growth rate then hoxH
-
+- hoxA slightly higher growth rate then hoxH, especially at the beginning of the cultivation
+- Results below:
 
 ```{r}
 df_OD_20220114 <- read_csv(paste0(dir_exp, "20220114_MC2_batch_mutants/20220114_MC2_measurements.csv"),
@@ -389,9 +389,36 @@ print(plot_OD(df_OD_20220114, groups = "replicate"), split = c(1,1,1,2), more = 
 print(plot_MU(df_mu_20220114, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
 ```
 
+**Final DCW and biomass yield of 2nd batch cultivation**
 
+```{r}
+df_DCW_20220114 <- data.frame(
+    sample = rep(c("hoxA", "hoxH"), each = 4),
+    tube_weight_mg = c(990.10, 1000.97, 997.56, 1004.62, 1001.22, 991.26, 991.15, 996.61),
+    total_weight_mg = c(1039.45, 1050.52, 1044.78, 1055.96, 1045.28, 1037.70, 1041.15, 1046.80)
+  ) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
 
-# 2022-XX-XX
+df_DCW_20211214
+```
+
+**Comparison of maximum growth rate and yield**
+
+```{r, fig.height = 3, fig.width = 6}
+plot_barchart(df_DCW_20220114, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
+df_mu_20220114 %>% filter(batchtime_h > 5) %>%
+  group_by(sample, channel_id) %>% summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  print(position = c(0.5,0,1,1))
+```
+
+# 2022-01-18
 
 ## Hox/hyp genes: overview of all relevant cultivations so far
 
@@ -440,18 +467,22 @@ xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
 - maximum growth rate and biomass yield
 
 ```{r, fig.height = 3, fig.width = 6}
-bind_rows(df_DCW_20211208, df_DCW_20211214) %>%
-  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
-  print(position = c(0,0,0.5,1), more = TRUE)
-
 bind_rows(.id = "experiment",
   df_mu_20211208 %>% filter(batchtime_h > 5),
   df_mu_20211214,
   df_mu_20220114) %>%
   group_by(sample, experiment, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
-  mutate(sample = factor(sample, c("WT", "hoxA", "hoxH", "hypB", "hypX"))) %>%
-  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  mutate(sample = factor(sample, c("WT", "hoxH", "hoxA", "hypB", "hypX"))) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.4), offset = 0.07) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
+bind_rows(
+  df_DCW_20211208 %>% filter(sample != "hoxA"),
+  df_DCW_20211214 %>% filter(sample != "hoxA"),
+  df_DCW_20220114) %>%
+  mutate(sample = factor(sample, c("WT", "hoxH", "hoxA", "hypB", "hypX"))) %>%
+  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1) %>%
   print(position = c(0.5,0,1,1), more = TRUE)
 ```
 
