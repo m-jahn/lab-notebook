@@ -402,7 +402,7 @@ df_DCW_20220114 <- data.frame(
     yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
   )
 
-df_DCW_20211214
+df_DCW_20220114
 ```
 
 **Comparison of maximum growth rate and yield**
@@ -418,9 +418,102 @@ df_mu_20220114 %>% filter(batchtime_h > 5) %>%
   print(position = c(0.5,0,1,1))
 ```
 
-# 2022-01-18
+# 2022-03-25
 
-## Hox/hyp genes: overview of all relevant cultivations so far
+## Cultivation of hox/hyp mutants in chemostat fructose, then formate
+
+**preparations for further cultivations**
+
+- plated all mutants on LB, from -80 cryostocks
+- inoculated 5 mL MM + Frc precultures
+- prepared bioreactor tubes, 8x chemostat setup + 8x batch setup
+- prepared medium 2x 2L R.e. MM
+
+**long term goals**
+
+- cultivate remaining mutant hoxG in fructose, batch
+- obtain yield (and max growth rate?) in chemostat or turbidostat for all hox/hyp mutants
+
+# 2022-03-31
+
+## Cultivation of hoxG in batch (last remaining mutant)
+
+- preparation of 3 additional precultures (2022-03-28), hoxG, WT in MM, hoxA in LB to make fresh cryo stock
+- start batch bioreactor with hoxG + WT
+- MC3 with 50 mL MM +2 g/L Frc, 1 g/L NH4Cl
+- low starting OD600 = 0.005, as before
+- 100 mL/min aeration
+- start: 16:00
+
+```{r}
+tibble(
+    strain = c("WT", "hoxG"),
+    OD600_diluted = c(0.482, 0.515)
+  ) %>%
+  mutate(
+    OD600 = OD600_diluted*4,
+    V_for_OD_0.005 = 0.005/OD600,
+    V_for_50_mL = V_for_OD_0.005*50
+  )
+```
+
+# 2022-04-04
+
+## Cultivation of hoxG in batch (last remaining mutant)
+
+- cultivation finished without problems
+- Results:
+
+```{r}
+df_OD_20220404 <- read_csv(paste0(dir_exp, "20220331_MC3_batch_mutants/20220331_MC3_measurements.csv"),
+  show_col_types = FALSE, col_select = -1) %>% filter(od_led == 720) %>%
+  mutate(sample = case_when(channel_id %in% c(1,3,5,7) ~ "WT", channel_id %in% c(2,4,6,8) ~ "hoxG")) %>%
+  group_by(sample, batchtime_h) %>% mutate(replicate = 1:n())
+
+df_mu_20220404 <- read_csv(paste0(dir_exp, "20220331_MC3_batch_mutants/MU.csv"),
+  show_col_types = FALSE, col_select = -1) %>%
+  filter(batchtime_h > 5) %>%
+  mutate(value = case_when(channel_id == 3 & batchtime_h < 12 ~ NaN, TRUE ~ value)) %>%
+  mutate(sample = case_when(channel_id %in% c(1,3,5,7) ~ "WT", channel_id %in% c(2,4,6,8) ~ "hoxG")) %>%
+  group_by(sample, batchtime_h) %>% mutate(replicate = 1:n())
+```
+
+```{r, fig.height = 5, fig.width = 3.5}
+print(plot_OD(df_OD_20220404, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20220404, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+```
+
+**Final DCW and biomass yield**
+
+```{r}
+df_DCW_20220404 <- data.frame(
+    sample = rep(c("WT", "hoxG"), each = 4),
+    tube_weight_mg = c(1000.8, 1004.8, 1006.7, 1013.1, 1000.9, 1012.6, 1024.8, 1000.4),
+    total_weight_mg = c(1036.7, 1041.0, 1043.2, 1049.1, 1036.4, 1048.4, 1060.7, 1036.0)
+  ) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
+
+df_DCW_20220404
+```
+
+**Comparison of maximum growth rate and yield**
+
+```{r, fig.height = 3, fig.width = 6}
+plot_barchart(df_DCW_20220404, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.55), offset = 0.1) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
+df_mu_20220404 %>% filter(batchtime_h > 5) %>%
+  group_by(sample, channel_id) %>% summarize(mu_max = max(value), .groups = "drop") %>%
+  arrange(channel_id) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
+  print(position = c(0.5,0,1,1))
+```
+# 2022-04-04
+
+## Overview of all relevant Hox/hyp mutant cultivations so far
 
 - growth curves and growth rate of all cultivations
 
@@ -429,6 +522,7 @@ df_mu_20220114 %>% filter(batchtime_h > 5) %>%
 df_OD_hox <- bind_rows(
   filter(df_OD_20211208, sample != "hoxA"),
   filter(df_OD_20211214, sample != "hoxA"),
+  filter(df_OD_20220404, sample == "hoxG") %>% mutate(batchtime_h = batchtime_h-8),
   df_OD_20220114, .id = "run") %>%
   select(sample, replicate, od_led, batchtime_h, od_corr)
 
@@ -442,11 +536,12 @@ df_OD_hox <- left_join(by = c("batchtime_h", "replicate", "od_led"),
 # overplot "area" of 4 replicates and loess fit
 xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
   groups = strain,
-  as.table = TRUE, layout = c(4, 1),
+  as.table = TRUE,
+  layout = c(length(unique(df_OD_hox$sample)), 1),
   between = list(x = 0.5, y = 0.5),
   ylab = expression("OD"[600]),
   par.settings = custom.colorblind(), 
-  lwd = 2, cex = 0, alpha = 0.2,
+  lwd = 2, cex = 0, alpha = 0.2, xlim = c(-5,55),
   scales = list(alternating = FALSE),
   panel = function(x, y, ...) {
     panel.grid(h = -1, v = -1, col = grey(0.9))
@@ -470,19 +565,20 @@ xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
 bind_rows(.id = "experiment",
   df_mu_20211208 %>% filter(batchtime_h > 5),
   df_mu_20211214,
-  df_mu_20220114) %>%
+  df_mu_20220114,
+  df_mu_20220404 %>% filter(sample == "hoxG")) %>%
   group_by(sample, experiment, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
-  mutate(sample = factor(sample, c("WT", "hoxH", "hoxA", "hypB", "hypX"))) %>%
+  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
   plot_barchart("sample", "mu_max", ylim = c(0, 0.4), offset = 0.07) %>%
   print(position = c(0,0,0.5,1), more = TRUE)
 
 bind_rows(
   df_DCW_20211208 %>% filter(sample != "hoxA"),
   df_DCW_20211214 %>% filter(sample != "hoxA"),
-  df_DCW_20220114) %>%
-  mutate(sample = factor(sample, c("WT", "hoxH", "hoxA", "hypB", "hypX"))) %>%
+  df_DCW_20220114,
+  df_DCW_20220404 %>% filter(sample == "hoxG")) %>%
+  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
   plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1) %>%
   print(position = c(0.5,0,1,1), more = TRUE)
 ```
-
