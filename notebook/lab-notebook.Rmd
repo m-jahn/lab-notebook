@@ -33,8 +33,8 @@ dir_exp = "~/Documents/SciLifeLab/Experiments/"
 Convenience functions for different charts.
 
 ```{r}
-plot_barchart <- function(df, xvar, yvar, xlim = NULL, ylim = NULL, offset = NULL, ...) {
-  scales = list(alternating = FALSE, x = list(limits = xlim), y = list(limits = ylim))
+plot_barchart <- function(df, xvar, yvar, xlim = NULL, ylim = NULL, offset = NULL, xrot = 0, ...) {
+  scales = list(alternating = FALSE, x = list(limits = xlim, rot = xrot), y = list(limits = ylim))
   if (!is.factor(df[[xvar]])) df <- mutate(df, across(matches(xvar), fct_inorder))
   xyplot(get(yvar) ~ get(xvar), df,
     par.settings = custom.colorblind(), fill = "white", lwd = 2,
@@ -54,15 +54,14 @@ plot_OD <- function(df, groups = NULL, ...) {
   xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)),
     filter(df, od_led == 720), type = "l", lwd = 2,
     groups = {if (is.null(groups)) NULL else {get(groups)}},
-    as.table = TRUE, layout = c(length(unique(df$sample)), 1),
-    between = list(x = 0.5, y = 0.5),
+    as.table = TRUE, between = list(x = 0.5, y = 0.5),
     ylab = expression("OD"[600]),
     par.settings = custom.colorblind(),
     scales = list(alternating = FALSE),
     panel = function(x, y, ...) {
       panel.grid(h = -1, v = -1, col = grey(0.9))
       panel.xyplot(x, y, ...)
-    }
+    }, ...
   )
 }
 
@@ -70,15 +69,14 @@ plot_MU <- function(df, groups = NULL, ...) {
   xyplot(value ~ batchtime_h | factor(sample, unique(sample)),
     df, type = "l", lwd = 2,
     groups = {if (is.null(groups)) NULL else {get(groups)}},
-    as.table = TRUE, layout = c(length(unique(df$sample)), 1),
-    between = list(x = 0.5, y = 0.5),
+    as.table = TRUE, between = list(x = 0.5, y = 0.5),
     ylab = expression("µ [h"^-1*"]"),
     par.settings = custom.colorblind(),
     scales = list(alternating = FALSE),
     panel = function(x, y, ...) {
       panel.grid(h = -1, v = -1, col = grey(0.9))
       panel.xyplot(x, y, ...)
-    }
+    }, ...
   )
 }
 ```
@@ -154,8 +152,8 @@ df_mu_20211206 <- read_csv(paste0(dir_exp, "20211201_MC2_batch_mutants/MU.csv"),
 ```
 
 ```{r, fig.height = 5, fig.width = 6}
-print(plot_OD(df_OD_20211206, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
-print(plot_MU(df_mu_20211206, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+print(plot_OD(df_OD_20211206, groups = "replicate", layout = c(4,1)), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211206, groups = "replicate", layout = c(4,1)), split = c(1,2,1,2), more = TRUE)
 ```
 
 **Direct comparison of maximum growth rate**
@@ -245,8 +243,8 @@ df_mu_20211208 <- read_csv(paste0(dir_exp, "20211208_MC2_batch_mutants/MU.csv"),
 ```
 
 ```{r, fig.height = 5, fig.width = 6}
-print(plot_OD(df_OD_20211208, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
-print(plot_MU(df_mu_20211208, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+print(plot_OD(df_OD_20211208, groups = "replicate", layout = c(4,1)), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211208, groups = "replicate", layout = c(4,1)), split = c(1,2,1,2), more = TRUE)
 ```
 
 **Comparison of maximum growth rate and yield**
@@ -329,8 +327,8 @@ df_mu_20211214 <- read_csv(paste0(dir_exp, "20211214_MC2_batch_mutants/MU.csv"),
 ```
 
 ```{r, fig.height = 5, fig.width = 6}
-print(plot_OD(df_OD_20211214, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
-print(plot_MU(df_mu_20211214, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+print(plot_OD(df_OD_20211214, groups = "replicate", layout = c(4,1)), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20211214, groups = "replicate", layout = c(4,1)), split = c(1,2,1,2), more = TRUE)
 ```
 
 **Comparison of maximum growth rate and yield**
@@ -385,8 +383,8 @@ df_mu_20220114 <- read_csv(paste0(dir_exp, "20220114_MC2_batch_mutants/MU.csv"),
 ```
 
 ```{r, fig.height = 5, fig.width = 3.5}
-print(plot_OD(df_OD_20220114, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
-print(plot_MU(df_mu_20220114, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+print(plot_OD(df_OD_20220114, groups = "replicate", layout = c(2,1)), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20220114, groups = "replicate", layout = c(2,1)), split = c(1,2,1,2), more = TRUE)
 ```
 
 **Final DCW and biomass yield of 2nd batch cultivation**
@@ -479,8 +477,8 @@ df_mu_20220404 <- read_csv(paste0(dir_exp, "20220331_MC3_batch_mutants/MU.csv"),
 ```
 
 ```{r, fig.height = 5, fig.width = 3.5}
-print(plot_OD(df_OD_20220404, groups = "replicate"), split = c(1,1,1,2), more = TRUE)
-print(plot_MU(df_mu_20220404, groups = "replicate"), split = c(1,2,1,2), more = TRUE)
+print(plot_OD(df_OD_20220404, groups = "replicate", layout = c(2,1)), split = c(1,1,1,2), more = TRUE)
+print(plot_MU(df_mu_20220404, groups = "replicate", layout = c(2,1)), split = c(1,2,1,2), more = TRUE)
 ```
 
 **Final DCW and biomass yield**
@@ -566,11 +564,11 @@ bind_rows(.id = "experiment",
   df_mu_20211208 %>% filter(batchtime_h > 5),
   df_mu_20211214,
   df_mu_20220114,
-  df_mu_20220404 %>% filter(sample == "hoxG")) %>%
+  df_mu_20220404) %>%
   group_by(sample, experiment, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
   mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
-  plot_barchart("sample", "mu_max", ylim = c(0, 0.4), offset = 0.07) %>%
+  plot_barchart("sample", "mu_max", ylim = c(0, 0.4), offset = 0.07, xrot = 35) %>%
   print(position = c(0,0,0.5,1), more = TRUE)
 
 bind_rows(
@@ -579,6 +577,176 @@ bind_rows(
   df_DCW_20220114,
   df_DCW_20220404 %>% filter(sample == "hoxG")) %>%
   mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
-  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1) %>%
+  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35) %>%
   print(position = c(0.5,0,1,1), more = TRUE)
 ```
+# 2022-04-11
+
+## Cultivation of 3 mutants + WT in chemostats
+
+- Purpose: to obtain (1) steady state yield and (2) optimal growth rate in continuous conditions
+- more reliable and reproducible results
+
+Preparations:
+
+- 2 x 2L minimal medium + 1 g/L fructose and 1 g/L NH4Cl
+- precultures in LB: WT, hoxA, hoxH, hypX
+- initial volume 60 mL, steady state 65 mL
+- 150 mL/min aeration
+- starting OD600 = 0.1
+- starting time: 11:00
+
+Calcultation of starting inocula:
+
+```{r}
+tibble(
+    strain = c("WT", "hoxA", "hoxH", "hypX"),
+    OD600_diluted = c(0.628, 0.473, 0.527, 0.480)
+  ) %>%
+  mutate(
+    OD600 = OD600_diluted*4,
+    V_for_OD_0.1 = 0.1/OD600,
+    V_for_60_mL = V_for_OD_0.1*65
+  )
+```
+
+# 2022-04-13
+
+## Cultivation of 3 mutants + WT in chemostats
+
+Sampling of first time point, roughly 48 h of growth in batch, then chemostat mode.
+
+- growth rate until now 0.1/h, chemostat
+- sampled tube 5-8 (replicate 2)
+- first 4 tubes (1st replicate of each strain) grew poorly due to error in medium composition
+- replaced medium bottle after around 24 h growth with fresh medium
+- all strains are growing but not all have reached equilibrium
+- continue cultivation and sample all biol. replicates multiple times
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+Planning:
+
+- nitrate respiration in chemostat worked poorly, due to constant resupply of NO3
+- nitrate respiration in batch should be better, requiring cells to use all NO3 reduction steps (NO3, NO2, NO, respiration)
+- need to plan the amount of NO3 carefully, so that it is limited:
+
+Experiments:
+
+- started preculture of a 0.5 ml TnLib aliquot in 10 mL LB medium
+- transfer to MM + fructose after 24h, grow 24 more hours
+
+# 2022-04-14
+
+## Cultivation of 3 mutants + WT in chemostats
+
+- sampled 2nd time point after all strains stabilized, t = 16:30
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+- inoculated 2nd preculture, 15 mL MM + 2 g/L Frc + 5 mL LB preculture from previous day
+- autoclaved 8 gas-tight 100 mL bottles
+
+# 2022-04-15
+
+## Cultivation of 3 mutants + WT in chemostats
+
+- sampled 3rd time point t = 11:00
+- set growth rate to µ = 0.2/h
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+- for nitrate respiration, need to replace O2 athmosphere with NaNO3 in medium
+- for a conc of 2 g/L Frc, we can use 0.5 g/L NaNO3 (as in [Kohlnann et al., 2014](https://pubs.acs.org/doi/10.1021/pr500491r))
+- from GEM, we know that 1 mmol Fru (0.18 g) per g biomass requires 3 mmol O2 (0.05 g). 3 mmol NaNO3 correspond to 0.26 g NaNO3, roughly a mass ratio of 1.44 g NaNO3/ g Fru. 
+- considering that NO3 has 3 instead of 2 oxygens atoms, we probably need less for same oxidation power
+- using 2x what Kohlmann et al. used, 1 g/L NaNO3 for 2 g/L Fru, should still be enough to make cells depend on full denitrification cycle (i.e. be respiration limited)
+- filled 4 gas cultivation bottles with 30 mL MM + 2 g/L Frc + 1 g/L NH4 + 1 g/L NaNO3
+- inoculated to OD600 = 0.1, can theoretically grow to approx. OD600 = 2 (4+ generations, 0.1->0.2->0.4->0.8->1.6)
+- pressurized to 1 bar (over pressure) with N2
+- shake at 30*C, 150 RPM
+
+# 2022-04-16
+
+## Cultivation of 3 mutants + WT in chemostats
+
+- sampled 4th time point at around t = 11:00
+- stopped reactor after it consumed most medium
+
+**Summary of chemostat cultivation**
+
+- OD over time
+
+```{r}
+df_OD_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_MC4_measurements.csv"),
+  show_col_types = FALSE, col_select = -1) %>% filter(od_led == 720) %>%
+  mutate(sample = case_when(channel_id %in% c(1,5) ~ "WT", channel_id %in% c(2,6) ~ "hoxA",
+    channel_id %in% c(3,7) ~ "hoxH", channel_id %in% c(4,8) ~ "hypX")) %>%
+  group_by(sample, batchtime_h) %>% mutate(replicate = 1:n())
+```
+
+```{r, fig.height = 3.5, fig.width = 6}
+plot_OD(df_OD_20220411, groups = "replicate", layout = c(2,2))
+```
+
+- DCW measurements
+
+```{r}
+df_DCW_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_gDCW.csv")) %>%
+  mutate(
+    DCW_mg = total_weight_mg - tube_weight_mg,
+    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+  )
+
+#  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
+plot_barchart(df_DCW_20220411, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35)
+```
+
+# 2022-04-18
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+- samples reached final OD600 ~ 1.2
+- sampled 1st time point (t ~ 3-4 generations)
+- diluted samples back to 30 mL of OD600 = 0.1
+- refilled with 1 bar N2 using gas dispenser
+
+```{r, fig.width = 7.5, fig.height = 3.5}
+# estimate N generations
+df_OD_20220415 <- read_csv(paste0(dir_exp, "20220415_NO3_cultivation_Re_TnLib/20220415_NO3_Cnecator.csv")) %>%
+  pivot_longer(cols = matches("^OD_(current|target)"), names_to = "OD_type", values_to = "OD") %>%
+  group_by(sample, time_h, replicate) %>%
+  mutate(n_generations = case_when(
+    time_h != 0 ~ log2(OD/0.1), TRUE ~ 0)) %>%
+  group_by(sample, replicate) %>%
+  mutate(cum_sum = cumsum(n_generations))
+
+# Plotting
+xyplot(OD ~ time_h | sample,
+  filter(df_OD_20220415, !(time_h == 0 & OD > 0.1)),
+  groups = replicate, lwd = 2, ylim = c(-0.075, 1.575),
+  par.settings = custom.colorblind(),
+  ylab = "OD720nm", type = c("p", "l"),
+  scales = list(alternating = FALSE),
+  as.table = TRUE, between = list(x = 0.5, y = 0.5),
+  panel=function(x, y, ...) {
+    panel.grid(h = -1, v = -1, col = grey(0.9))
+    panel.xyplot(x, y, ...)
+    panel.key(...)
+  }
+) %>% print(split = c(1,1,2,1), more = TRUE)
+
+xyplot(n_generations + cum_sum ~ factor(time_h) | sample,
+  filter(df_OD_20220415, OD != 0.1), par.settings = custom.colorblind(),
+  scales = list(alternating = FALSE), ylim = c(-1, 21),
+  between = list(x = 0.5, y = 0.5), beside = TRUE,
+  border = "white", ylab = "n generations", ewidth = 0.15,
+  panel = function(x, y, ...) {
+    panel.grid(h = -1, v = -1, col = grey(0.9))
+    panel.barplot(x, y, fill_alpha = 0.5, lwd = 2, ...)
+    panel.annotate(x, y, digits = 2, offset = 1.5, cex = 0.7, ...)
+    panel.key(...)
+  }
+) %>% print(split = c(2,1,2,1))
+```
+
