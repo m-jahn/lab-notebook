@@ -689,17 +689,24 @@ df_OD_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20
 plot_OD(df_OD_20220411, groups = "replicate", layout = c(2,2))
 ```
 
-- DCW measurements
+- DCW measurements for growth rate = 0.1 and 0.2
+- no significant trend visible, and variation was quite high as already seen in
+  chemostat OD measurements
+- it remains open if mutants have different growth rate than WT (in cont. culture)
 
-```{r}
-df_DCW_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_gDCW.csv")) %>%
+```{r, fig.height = 3, fig.width = 6}
+df_DCW_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_gDCW.csv"), col_types = cols()) %>%
   mutate(
     DCW_mg = total_weight_mg - tube_weight_mg,
-    yield_gDCW_gFRC = DCW_mg/(1000 * 2.0 * 0.05)
+    yield_gDCW_gFRC = DCW_mg/(1000 * 1.0 * 0.05)
   )
 
-#  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
-plot_barchart(df_DCW_20220411, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35)
+df_DCW_20220411 %>% filter(growth_rate == 0.1) %>%
+  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35) %>%
+  print(split = c(1,1,2,1), more = TRUE)
+df_DCW_20220411 %>% filter(growth_rate == 0.2) %>%
+  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35) %>%
+  print(split = c(2,1,2,1))
 ```
 
 # 2022-04-18
@@ -710,6 +717,24 @@ plot_barchart(df_DCW_20220411, "sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), of
 - sampled 1st time point (t ~ 3-4 generations)
 - diluted samples back to 30 mL of OD600 = 0.1
 - refilled with 1 bar N2 using gas dispenser
+
+# 2022-04-19
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+- samples reached final OD600 ~ 1.2
+- sampled 2nd time point (t ~ 7-8 generations)
+- diluted samples back to 30 mL of OD600 = 0.1
+- refilled with 1 bar N2 using gas dispenser
+
+# 2022-04-20
+
+## Cultivation of C. necator Tn library with nitrate respiration
+
+- samples reached final OD600 ~ 1.2
+- sampled 3rd and final time point (t ~ 10-12 generations)
+- results of gas bottle cultivation
+
 
 ```{r, fig.width = 7.5, fig.height = 3.5}
 # estimate N generations
@@ -750,3 +775,39 @@ xyplot(n_generations + cum_sum ~ factor(time_h) | sample,
 ) %>% print(split = c(2,1,2,1))
 ```
 
+
+## Tn library with nitrate respiration, NGS sample preparation
+
+- gDNA extraction using Thermo Gene Jet kit
+- starting material: 16 samples from 4 time points x 4 replicates
+- average cell mass is 3 mL of OD600 = 1.2 (3.6 OD units)
+- protocol according to manufacturer
+- eluted gDNA in 2 x 50 µL elution buffer
+
+
+```{r}
+df_NGS_20220420 <- read_csv(paste0(dir_exp, "20220420_NO3_TnLib_NGS_prep/sample_concentration.csv"), col_types = cols())
+print(df_NGS_20220420)
+```
+
+- PCR to amplify barcodes
+- using NEB Q5 master mix
+- recipe, see table
+- program: according to manufacturer ("BARSEQ98")
+
+component         |  volume 1x    | volume 18x
+| --------------- | ------------- | --------- |
+| Q5 MM 2x        | 10            | 180       |
+| H2O             | 4             |  72       |
+| F-primer 10 uM  | 2             |   -       |
+| R-primer 10 uM  | 2             |  36       |
+| gDNA 200-400 ng | 2             |   -       |
+| Total           | 20            | 16/well   |
+
+![Gel with 16 PCR products and expected size 180 = bp](/home/michael/Documents/SciLifeLab/Experiments/20220420_NO3_TnLib_NGS_prep/gel_crop.png)
+
+**Summary:**
+
+- gDNA extraction and PCR successfull
+- expected PCR product size = 180 bp is OK
+- Nick will measure DNA concentration with qBit and do library prep
