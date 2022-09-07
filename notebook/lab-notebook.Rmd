@@ -12,8 +12,7 @@ output:
 
 # Preface
 
-Lab notebook for December 2021 to May 2022. Previous lab books are in paper form.
-Low compexity lab data is directly added to this notebook and visualized. For this purpose, some R libraries are loaded.
+Lab notebook for December 2021 to May 2022. Previous lab books are in paper form. Low compexity lab data is directly added to this notebook and visualized. For this purpose, some R libraries are loaded.
 
 ```{r}
 suppressPackageStartupMessages({
@@ -27,7 +26,7 @@ suppressPackageStartupMessages({
 Set default experiments directory.
 
 ```{r}
-dir_exp = "~/Documents/SciLifeLab/Experiments/"
+dir_exp = "~/Documents/Scilifelab/Experiments/"
 ```
 
 Convenience functions for different charts.
@@ -85,29 +84,27 @@ plot_MU <- function(df, groups = NULL, ...) {
 
 ## Shipment of TnLib samples to JBEI
 
-- samples were picked up from a courier from YSDS (15:00)
-- content: 4 x 1 mL aliquots of TnLib, -80*C
-- sent on 10-20 kg dry ice, estimated delivery in 4 days
-- tested viability by plating 10 µL of 1:10, 1:100, 1:1000 dilutions
-- viability was higher than expected, around 5x10^4 CFU/µL (before freezing!)
-- colony morphology was 100% *Ralstonia*
-
+-   samples were picked up from a courier from YSDS (15:00)
+-   content: 4 x 1 mL aliquots of TnLib, -80\*C
+-   sent on 10-20 kg dry ice, estimated delivery in 4 days
+-   tested viability by plating 10 µL of 1:10, 1:100, 1:1000 dilutions
+-   viability was higher than expected, around 5x10\^4 CFU/µL (before freezing!)
+-   colony morphology was 100% *Ralstonia*
 
 ## MC2 cultivation of hox/hyp mutants
 
-- stopped cultivation after 48 h
-- measured external OD
-- harvested 45 mL, washed with mqH2O, and determined DCW by drying ON at 55*C
-- refilled MC2 tubes with 50 mL fresh MM + 2 g/L glc + 1 g/L NH4Cl
-- follow growth and determine mu max
-
+-   stopped cultivation after 48 h
+-   measured external OD
+-   harvested 45 mL, washed with mqH2O, and determined DCW by drying ON at 55\*C
+-   refilled MC2 tubes with 50 mL fresh MM + 2 g/L glc + 1 g/L NH4Cl
+-   follow growth and determine mu max
 
 # 2021-12-06
 
 ## Results MC2 cultivation of hox/hyp mutants
 
-- finished second batch cultivation: not useful to determine yield/growth rate differences because cells were in different growth states or density when starting (just filled up new medium, instead of restarting properly)
-- measured DCW, yield and OD/growth rate of first batch growth experiment, see results below
+-   finished second batch cultivation: not useful to determine yield/growth rate differences because cells were in different growth states or density when starting (just filled up new medium, instead of restarting properly)
+-   measured DCW, yield and OD/growth rate of first batch growth experiment, see results below
 
 **Table: final DCW and biomass yield of 1st batch cultivation**
 
@@ -165,30 +162,31 @@ df_mu_20211206 %>% filter(batchtime_h > 5) %>%
   arrange(channel_id) %>%
   plot_barchart(xvar = "sample", yvar = "mu_max", ylim = c(0, 0.3), offset = 0.05)
 ```
+
 **Conclusion**
 
-- growth and/or yield difference between WT and hydrogenase mutants seems to be marginal
-- plate reader experiments gave hints that mutants _could_ grow faster, but as of yet inconclusive
-- minimal medium stock that was used for MC showed cloudiness over night --> contamination
-- discarded MM, prepared fresh medium, need to repeat MC experiment
+-   growth and/or yield difference between WT and hydrogenase mutants seems to be marginal
+-   plate reader experiments gave hints that mutants *could* grow faster, but as of yet inconclusive
+-   minimal medium stock that was used for MC showed cloudiness over night --\> contamination
+-   discarded MM, prepared fresh medium, need to repeat MC experiment
 
 ## Preparations to redo MC2 cultivation of hox/hyp mutants
 
-- goal: get more growth rate/yield data, start with lower OD to have adaptation phase happening early during cultivation, and optimally adapted cells in exp. phase
-- started precultures for WT, hoxA, hypX, hypB1, 5 mL fresh MM + 2 g/L Frc
-- prepared and autoclaved fresh set of reactor tubes
+-   goal: get more growth rate/yield data, start with lower OD to have adaptation phase happening early during cultivation, and optimally adapted cells in exp. phase
+-   started precultures for WT, hoxA, hypX, hypB1, 5 mL fresh MM + 2 g/L Frc
+-   prepared and autoclaved fresh set of reactor tubes
 
 # 2021-12-08
 
 ## Redo experiment batch growth of hox/hyp mutants
 
-- repetition of previous [experiment from 2021-12-03](#2021-12-03)
-- started MC2 with 4 strains, 2 biological replicates
-- fresh MM + 2 g/L Frc, + 1 g/L NH4Cl
-- aeration: 100 mL/min for all tubes
-- temp = 30*C
-- t_start = 11:00
-- precultures:
+-   repetition of previous [experiment from 2021-12-03](#2021-12-03)
+-   started MC2 with 4 strains, 2 biological replicates
+-   fresh MM + 2 g/L Frc, + 1 g/L NH4Cl
+-   aeration: 100 mL/min for all tubes
+-   temp = 30\*C
+-   t_start = 11:00
+-   precultures:
 
 ```{r}
 tibble(
@@ -201,13 +199,14 @@ tibble(
     V_for_50_mL = V_for_OD_0.005*50
   )
 ```
+
 # 2021-12-10
 
 ## Results MC2 cultivation of hox/hyp mutants
 
-- starting with lower OD was a useful strategy: longer exp growth phase
-- contrary to previous results, hox A did not grow faster but had longer log phase (preculture old?)
-- measured DCW, yield and OD/growth rate
+-   starting with lower OD was a useful strategy: longer exp growth phase
+-   contrary to previous results, hox A did not grow faster but had longer log phase (preculture old?)
+-   measured DCW, yield and OD/growth rate
 
 **Table: final DCW and biomass yield of 2nd batch cultivation**
 
@@ -265,14 +264,14 @@ df_mu_20211208 %>% filter(batchtime_h > 5) %>%
 
 ## Redo experiment batch growth of hox/hyp mutants
 
-- repetition of previous [experiment from 2021-12-08](#2021-12-08)
-- started MC2 with 4 strains, 2 biological replicates
-- MM + 2 g/L Frc, + 1 g/L NH4Cl
-- aeration: 100 mL/min for all tubes
-- temp = 30*C
-- t_start = 15:00
-- precultures: 10 mL shake flask, MM + 2g/L Frc, 24h growth
-- use very low starting OD as last time
+-   repetition of previous [experiment from 2021-12-08](#2021-12-08)
+-   started MC2 with 4 strains, 2 biological replicates
+-   MM + 2 g/L Frc, + 1 g/L NH4Cl
+-   aeration: 100 mL/min for all tubes
+-   temp = 30\*C
+-   t_start = 15:00
+-   precultures: 10 mL shake flask, MM + 2g/L Frc, 24h growth
+-   use very low starting OD as last time
 
 ```{r}
 tibble(
@@ -290,9 +289,9 @@ tibble(
 
 ## Results MC2 cultivation of hox/hyp mutants
 
-- repetition of previous experiment from 2021-12-08
-- hoxA had again a longer log phase than expected --> repeat
-- measured DCW, yield and OD/growth rate
+-   repetition of previous experiment from 2021-12-08
+-   hoxA had again a longer log phase than expected --\> repeat
+-   measured DCW, yield and OD/growth rate
 
 **Final DCW and biomass yield of 2nd batch cultivation**
 
@@ -348,26 +347,26 @@ df_mu_20211214 %>% filter(batchtime_h > 5) %>%
 
 ## Hox genes: new cultivation with hoxA and hoxH
 
-- previous hoxA cultivations in MC did not show promising µ increase as shown in plate reader pre-experiments
-- maybe precultures were not viable or contaminated; to finalize hoxA analysis, cultivation is redone with 4 replicates
-- prepared precultures 3x 5 mL flask with MM + 2 g/L Frc and 1 g/L NH4Cl
-- inoculated: delta hoxA, hoxH, hoxG (did not grow, plate old)
+-   previous hoxA cultivations in MC did not show promising µ increase as shown in plate reader pre-experiments
+-   maybe precultures were not viable or contaminated; to finalize hoxA analysis, cultivation is redone with 4 replicates
+-   prepared precultures 3x 5 mL flask with MM + 2 g/L Frc and 1 g/L NH4Cl
+-   inoculated: delta hoxA, hoxH, hoxG (did not grow, plate old)
 
 # 2022-01-13
 
 ## Hox genes: new cultivation with hoxA and hoxH
 
-- hoxA and hoxH precultures have grown
-- prepared MC2 batch cultivation as before, without WT
-- setup: 4x hoxA, 4x hoxH, alternating order in MC (A, H, A, H, ...)
+-   hoxA and hoxH precultures have grown
+-   prepared MC2 batch cultivation as before, without WT
+-   setup: 4x hoxA, 4x hoxH, alternating order in MC (A, H, A, H, ...)
 
 # 2022-01-17
 
 ## Hox genes: new cultivation with hoxA and hoxH
 
-- cultivation finished without problems
-- hoxA slightly higher growth rate then hoxH, especially at the beginning of the cultivation
-- Results below:
+-   cultivation finished without problems
+-   hoxA slightly higher growth rate then hoxH, especially at the beginning of the cultivation
+-   Results below:
 
 ```{r}
 df_OD_20220114 <- read_csv(paste0(dir_exp, "20220114_MC2_batch_mutants/20220114_MC2_measurements.csv"),
@@ -422,26 +421,26 @@ df_mu_20220114 %>% filter(batchtime_h > 5) %>%
 
 **preparations for further cultivations**
 
-- plated all mutants on LB, from -80 cryostocks
-- inoculated 5 mL MM + Frc precultures
-- prepared bioreactor tubes, 8x chemostat setup + 8x batch setup
-- prepared medium 2x 2L R.e. MM
+-   plated all mutants on LB, from -80 cryostocks
+-   inoculated 5 mL MM + Frc precultures
+-   prepared bioreactor tubes, 8x chemostat setup + 8x batch setup
+-   prepared medium 2x 2L R.e. MM
 
 **long term goals**
 
-- cultivate remaining mutant hoxG in fructose, batch
-- obtain yield (and max growth rate?) in chemostat or turbidostat for all hox/hyp mutants
+-   cultivate remaining mutant hoxG in fructose, batch
+-   obtain yield (and max growth rate?) in chemostat or turbidostat for all hox/hyp mutants
 
 # 2022-03-31
 
 ## Cultivation of hoxG in batch (last remaining mutant)
 
-- preparation of 3 additional precultures (2022-03-28), hoxG, WT in MM, hoxA in LB to make fresh cryo stock
-- start batch bioreactor with hoxG + WT
-- MC3 with 50 mL MM +2 g/L Frc, 1 g/L NH4Cl
-- low starting OD600 = 0.005, as before
-- 100 mL/min aeration
-- start: 16:00
+-   preparation of 3 additional precultures (2022-03-28), hoxG, WT in MM, hoxA in LB to make fresh cryo stock
+-   start batch bioreactor with hoxG + WT
+-   MC3 with 50 mL MM +2 g/L Frc, 1 g/L NH4Cl
+-   low starting OD600 = 0.005, as before
+-   100 mL/min aeration
+-   start: 16:00
 
 ```{r}
 tibble(
@@ -459,8 +458,8 @@ tibble(
 
 ## Cultivation of hoxG in batch (last remaining mutant)
 
-- cultivation finished without problems
-- Results:
+-   cultivation finished without problems
+-   Results:
 
 ```{r}
 df_OD_20220404 <- read_csv(paste0(dir_exp, "20220331_MC3_batch_mutants/20220331_MC3_measurements.csv"),
@@ -509,11 +508,12 @@ df_mu_20220404 %>% filter(batchtime_h > 5) %>%
   plot_barchart("sample", "mu_max", ylim = c(0, 0.42), offset = 0.07) %>%
   print(position = c(0.5,0,1,1))
 ```
+
 # 2022-04-04
 
 ## Overview of all relevant Hox/hyp mutant cultivations so far
 
-- growth curves and growth rate of all cultivations
+-   growth curves and growth rate of all cultivations
 
 ```{r, fig.width = 8.5, fig.height = 3.25}
 # merge all data into one simple df
@@ -557,44 +557,52 @@ xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
 )
 ```
 
-- maximum growth rate and biomass yield
+-   maximum growth rate and biomass yield
 
 ```{r, fig.height = 3, fig.width = 6}
-bind_rows(.id = "experiment",
+df_mu_hox <- bind_rows(.id = "experiment",
   df_mu_20211208 %>% filter(batchtime_h > 5),
   df_mu_20211214,
   df_mu_20220114,
   df_mu_20220404) %>%
   group_by(sample, experiment, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
-  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
-  plot_barchart("sample", "mu_max", ylim = c(0, 0.4), offset = 0.07, xrot = 35) %>%
-  print(position = c(0,0,0.5,1), more = TRUE)
+  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX")))
 
-bind_rows(
+df_dcw_hox <- bind_rows(
   df_DCW_20211208 %>% filter(sample != "hoxA"),
   df_DCW_20211214 %>% filter(sample != "hoxA"),
   df_DCW_20220114,
   df_DCW_20220404 %>% filter(sample == "hoxG")) %>%
-  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX"))) %>%
-  plot_barchart("sample", "yield_gDCW_gFRC", ylim = c(0, 0.6), offset = 0.1, xrot = 35) %>%
+  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX")))
+
+plot_barchart(df_mu_hox, "sample", "mu_max",
+  ylim = c(0, 0.4), offset = 0.07, xrot = 35) %>%
+  print(position = c(0,0,0.5,1), more = TRUE)
+
+plot_barchart(df_dcw_hox, "sample", "yield_gDCW_gFRC",
+  ylim = c(0, 0.6), offset = 0.1, xrot = 35) %>%
   print(position = c(0.5,0,1,1), more = TRUE)
+
+write_csv(df_mu_hox, "../../R-notebook-ralstonia-energy/data/growth_assays/df_mu_hox.csv")
+write_csv(df_dcw_hox, "../../R-notebook-ralstonia-energy/data/growth_assays/df_dcw_hox.csv")
 ```
+
 # 2022-04-11
 
 ## Cultivation of 3 mutants + WT in chemostats
 
-- Purpose: to obtain (1) steady state yield and (2) optimal growth rate in continuous conditions
-- more reliable and reproducible results
+-   Purpose: to obtain (1) steady state yield and (2) optimal growth rate in continuous conditions
+-   more reliable and reproducible results
 
 Preparations:
 
-- 2 x 2L minimal medium + 1 g/L fructose and 1 g/L NH4Cl
-- precultures in LB: WT, hoxA, hoxH, hypX
-- initial volume 60 mL, steady state 65 mL
-- 150 mL/min aeration
-- starting OD600 = 0.1
-- starting time: 11:00
+-   2 x 2L minimal medium + 1 g/L fructose and 1 g/L NH4Cl
+-   precultures in LB: WT, hoxA, hoxH, hypX
+-   initial volume 60 mL, steady state 65 mL
+-   150 mL/min aeration
+-   starting OD600 = 0.1
+-   starting time: 11:00
 
 Calcultation of starting inocula:
 
@@ -616,66 +624,66 @@ tibble(
 
 Sampling of first time point, roughly 48 h of growth in batch, then chemostat mode.
 
-- growth rate until now 0.1/h, chemostat
-- sampled tube 5-8 (replicate 2)
-- first 4 tubes (1st replicate of each strain) grew poorly due to error in medium composition
-- replaced medium bottle after around 24 h growth with fresh medium
-- all strains are growing but not all have reached equilibrium
-- continue cultivation and sample all biol. replicates multiple times
+-   growth rate until now 0.1/h, chemostat
+-   sampled tube 5-8 (replicate 2)
+-   first 4 tubes (1st replicate of each strain) grew poorly due to error in medium composition
+-   replaced medium bottle after around 24 h growth with fresh medium
+-   all strains are growing but not all have reached equilibrium
+-   continue cultivation and sample all biol. replicates multiple times
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
 Planning:
 
-- nitrate respiration in chemostat worked poorly, due to constant resupply of NO3
-- nitrate respiration in batch should be better, requiring cells to use all NO3 reduction steps (NO3, NO2, NO, respiration)
-- need to plan the amount of NO3 carefully, so that it is limited:
+-   nitrate respiration in chemostat worked poorly, due to constant resupply of NO3
+-   nitrate respiration in batch should be better, requiring cells to use all NO3 reduction steps (NO3, NO2, NO, respiration)
+-   need to plan the amount of NO3 carefully, so that it is limited:
 
 Experiments:
 
-- started preculture of a 0.5 ml TnLib aliquot in 10 mL LB medium
-- transfer to MM + fructose after 24h, grow 24 more hours
+-   started preculture of a 0.5 ml TnLib aliquot in 10 mL LB medium
+-   transfer to MM + fructose after 24h, grow 24 more hours
 
 # 2022-04-14
 
 ## Cultivation of 3 mutants + WT in chemostats
 
-- sampled 2nd time point after all strains stabilized, t = 16:30
+-   sampled 2nd time point after all strains stabilized, t = 16:30
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
-- inoculated 2nd preculture, 15 mL MM + 2 g/L Frc + 5 mL LB preculture from previous day
-- autoclaved 8 gas-tight 100 mL bottles
+-   inoculated 2nd preculture, 15 mL MM + 2 g/L Frc + 5 mL LB preculture from previous day
+-   autoclaved 8 gas-tight 100 mL bottles
 
 # 2022-04-15
 
 ## Cultivation of 3 mutants + WT in chemostats
 
-- sampled 3rd time point t = 11:00
-- set growth rate to µ = 0.2/h
+-   sampled 3rd time point t = 11:00
+-   set growth rate to µ = 0.2/h
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
-- for nitrate respiration, need to replace O2 athmosphere with NaNO3 in medium
-- for a conc of 2 g/L Frc, we can use 0.5 g/L NaNO3 (as in [Kohlnann et al., 2014](https://pubs.acs.org/doi/10.1021/pr500491r))
-- from GEM, we know that 1 mmol Fru (0.18 g) per g biomass requires 3 mmol O2 (0.05 g). 3 mmol NaNO3 correspond to 0.26 g NaNO3, roughly a mass ratio of 1.44 g NaNO3/ g Fru. 
-- considering that NO3 has 3 instead of 2 oxygens atoms, we probably need less for same oxidation power
-- using 2x what Kohlmann et al. used, 1 g/L NaNO3 for 2 g/L Fru, should still be enough to make cells depend on full denitrification cycle (i.e. be respiration limited)
-- filled 4 gas cultivation bottles with 30 mL MM + 2 g/L Frc + 1 g/L NH4 + 1 g/L NaNO3
-- inoculated to OD600 = 0.1, can theoretically grow to approx. OD600 = 2 (4+ generations, 0.1->0.2->0.4->0.8->1.6)
-- pressurized to 1 bar (over pressure) with N2
-- shake at 30*C, 150 RPM
+-   for nitrate respiration, need to replace O2 athmosphere with NaNO3 in medium
+-   for a conc of 2 g/L Frc, we can use 0.5 g/L NaNO3 (as in [Kohlnann et al., 2014](https://pubs.acs.org/doi/10.1021/pr500491r))
+-   from GEM, we know that 1 mmol Fru (0.18 g) per g biomass requires 3 mmol O2 (0.05 g). 3 mmol NaNO3 correspond to 0.26 g NaNO3, roughly a mass ratio of 1.44 g NaNO3/ g Fru.
+-   considering that NO3 has 3 instead of 2 oxygens atoms, we probably need less for same oxidation power
+-   using 2x what Kohlmann et al. used, 1 g/L NaNO3 for 2 g/L Fru, should still be enough to make cells depend on full denitrification cycle (i.e. be respiration limited)
+-   filled 4 gas cultivation bottles with 30 mL MM + 2 g/L Frc + 1 g/L NH4 + 1 g/L NaNO3
+-   inoculated to OD600 = 0.1, can theoretically grow to approx. OD600 = 2 (4+ generations, 0.1-\>0.2-\>0.4-\>0.8-\>1.6)
+-   pressurized to 1 bar (over pressure) with N2
+-   shake at 30\*C, 150 RPM
 
 # 2022-04-16
 
 ## Cultivation of 3 mutants + WT in chemostats
 
-- sampled 4th time point at around t = 11:00
-- stopped reactor after it consumed most medium
+-   sampled 4th time point at around t = 11:00
+-   stopped reactor after it consumed most medium
 
 **Summary of chemostat cultivation**
 
-- OD over time
+-   OD over time
 
 ```{r}
 df_OD_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_MC4_measurements.csv"),
@@ -689,10 +697,9 @@ df_OD_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20
 plot_OD(df_OD_20220411, groups = "replicate", layout = c(2,2))
 ```
 
-- DCW measurements for growth rate = 0.1 and 0.2
-- no significant trend visible, and variation was quite high as already seen in
-  chemostat OD measurements
-- it remains open if mutants have different growth rate than WT (in cont. culture)
+-   DCW measurements for growth rate = 0.1 and 0.2
+-   no significant trend visible, and variation was quite high as already seen in chemostat OD measurements
+-   it remains open if mutants have different growth rate than WT (in cont. culture)
 
 ```{r, fig.height = 3, fig.width = 6}
 df_DCW_20220411 <- read_csv(paste0(dir_exp, "20220411_MC4_Re_mutants_chemostat/20220411_gDCW.csv"), col_types = cols()) %>%
@@ -713,28 +720,27 @@ df_DCW_20220411 %>% filter(growth_rate == 0.2) %>%
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
-- samples reached final OD600 ~ 1.2
-- sampled 1st time point (t ~ 3-4 generations)
-- diluted samples back to 30 mL of OD600 = 0.1
-- refilled with 1 bar N2 using gas dispenser
+-   samples reached final OD600 \~ 1.2
+-   sampled 1st time point (t \~ 3-4 generations)
+-   diluted samples back to 30 mL of OD600 = 0.1
+-   refilled with 1 bar N2 using gas dispenser
 
 # 2022-04-19
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
-- samples reached final OD600 ~ 1.2
-- sampled 2nd time point (t ~ 7-8 generations)
-- diluted samples back to 30 mL of OD600 = 0.1
-- refilled with 1 bar N2 using gas dispenser
+-   samples reached final OD600 \~ 1.2
+-   sampled 2nd time point (t \~ 7-8 generations)
+-   diluted samples back to 30 mL of OD600 = 0.1
+-   refilled with 1 bar N2 using gas dispenser
 
 # 2022-04-20
 
 ## Cultivation of C. necator Tn library with nitrate respiration
 
-- samples reached final OD600 ~ 1.2
-- sampled 3rd and final time point (t ~ 10-12 generations)
-- results of gas bottle cultivation
-
+-   samples reached final OD600 \~ 1.2
+-   sampled 3rd and final time point (t \~ 10-12 generations)
+-   results of gas bottle cultivation
 
 ```{r, fig.width = 7.5, fig.height = 3.5}
 # estimate N generations
@@ -775,39 +781,37 @@ xyplot(n_generations + cum_sum ~ factor(time_h) | sample,
 ) %>% print(split = c(2,1,2,1))
 ```
 
-
 ## Tn library with nitrate respiration, NGS sample preparation
 
-- gDNA extraction using Thermo Gene Jet kit
-- starting material: 16 samples from 4 time points x 4 replicates
-- average cell mass is 3 mL of OD600 = 1.2 (3.6 OD units)
-- protocol according to manufacturer
-- eluted gDNA in 2 x 50 µL elution buffer
-
+-   gDNA extraction using Thermo Gene Jet kit
+-   starting material: 16 samples from 4 time points x 4 replicates
+-   average cell mass is 3 mL of OD600 = 1.2 (3.6 OD units)
+-   protocol according to manufacturer
+-   eluted gDNA in 2 x 50 µL elution buffer
 
 ```{r}
 df_NGS_20220420 <- read_csv(paste0(dir_exp, "20220420_NO3_TnLib_NGS_prep/sample_concentration.csv"), col_types = cols())
 print(df_NGS_20220420)
 ```
 
-- PCR to amplify barcodes
-- using NEB Q5 master mix
-- recipe, see table
-- program: according to manufacturer ("BARSEQ98")
+-   PCR to amplify barcodes
+-   using NEB Q5 master mix
+-   recipe, see table
+-   program: according to manufacturer ("BARSEQ98")
 
-component         |  volume 1x    | volume 18x
-| --------------- | ------------- | --------- |
-| Q5 MM 2x        | 10            | 180       |
-| H2O             | 4             |  72       |
-| F-primer 10 uM  | 2             |   -       |
-| R-primer 10 uM  | 2             |  36       |
-| gDNA 200-400 ng | 2             |   -       |
-| Total           | 20            | 16/well   |
+| component       | volume 1x | volume 18x |
+|-----------------|-----------|------------|
+| Q5 MM 2x        | 10        | 180        |
+| H2O             | 4         | 72         |
+| F-primer 10 uM  | 2         | \-         |
+| R-primer 10 uM  | 2         | 36         |
+| gDNA 200-400 ng | 2         | \-         |
+| Total           | 20        | 16/well    |
 
-![Gel with 16 PCR products and expected size 180 = bp](/home/michael/Documents/SciLifeLab/Experiments/20220420_NO3_TnLib_NGS_prep/gel_crop.png)
+![Gel with 16 PCR products and expected size 180 = bp](../../../../Experiments/20220420_NO3_TnLib_NGS_prep/gel_crop.png)
 
 **Summary:**
 
-- gDNA extraction and PCR successfull
-- expected PCR product size = 180 bp is OK
-- Nick will measure DNA concentration with qBit and do library prep
+-   gDNA extraction and PCR successfull
+-   expected PCR product size = 180 bp is OK
+-   Nick will measure DNA concentration with qBit and do library prep
