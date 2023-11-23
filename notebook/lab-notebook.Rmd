@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
 Set default experiments directory.
 
 ```{r}
-dir_exp = "~/Documents/Scilifelab/Experiments/"
+dir_exp = "/media/michael/data/Scilifelab/Experiments/"
 ```
 
 Convenience functions for different charts.
@@ -290,7 +290,7 @@ tibble(
 ## Results MC2 cultivation of hox/hyp mutants
 
 -   repetition of previous experiment from 2021-12-08
--   hoxA had again a longer log phase than expected --\> repeat
+-   hoxA had again a longer log phase than expected -> repeat
 -   measured DCW, yield and OD/growth rate
 
 **Final DCW and biomass yield of 2nd batch cultivation**
@@ -518,63 +518,81 @@ df_mu_20220404 %>% filter(batchtime_h > 5) %>%
 ```{r, fig.width = 8.5, fig.height = 3.25}
 # merge all data into one simple df
 df_OD_hox <- bind_rows(
+  filter(df_OD_20211206, od_led == 720) %>%
+    mutate(replicate = replicate + 2),
   filter(df_OD_20211208, sample != "hoxA"),
   filter(df_OD_20211214, sample != "hoxA"),
-  filter(df_OD_20220404, sample == "hoxG") %>% mutate(batchtime_h = batchtime_h-8),
+  filter(df_OD_20220404, sample == "hoxG") %>%
+    mutate(batchtime_h = batchtime_h-8),
   df_OD_20220114, .id = "run") %>%
   select(sample, replicate, od_led, batchtime_h, od_corr)
 
-df_OD_hox <- left_join(by = c("batchtime_h", "replicate", "od_led"),
+# move WT control to separate column for direct comparison
+df_OD_hox <- full_join(by = c("batchtime_h", "replicate", "od_led"),
     filter(df_OD_hox, sample != "WT"),
     filter(df_OD_hox, sample == "WT") %>% ungroup %>% select(-sample) %>% rename(od_ctrl = od_corr)
   ) %>%
+  filter(batchtime_h <= 45, batchtime_h >= 0) %>%
   arrange(sample, replicate) %>% ungroup %>%
-  pivot_longer(values_to = "od_corr", names_to = "strain", cols = starts_with("od_c"))
+  pivot_longer(values_to = "od_corr", names_to = "strain", cols = starts_with("od_c")) %>%
+  mutate(sample = factor(sample, c("hoxG", "hypB", "hypX", "hoxA", "hoxH")))
 
-# overplot "area" of 4 replicates and loess fit
-xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
-  groups = strain,
+# plot single replicates
+xyplot(od_corr ~ batchtime_h | sample, df_OD_hox,#filter(sample == "hoxG"),
+  groups = paste(strain, replicate),
   as.table = TRUE,
   layout = c(length(unique(df_OD_hox$sample)), 1),
   between = list(x = 0.5, y = 0.5),
-  ylab = expression("OD"[600]),
+  ylab = expression("OD"[720]),
   par.settings = custom.colorblind(), 
-  lwd = 2, cex = 0, alpha = 0.2, xlim = c(-5,55),
+  xlim = c(-5,50), lwd = 2,
+  col = rep(c("#E7298A", "#66A61E"), each = 6),
   scales = list(alternating = FALSE),
   panel = function(x, y, ...) {
     panel.grid(h = -1, v = -1, col = grey(0.9))
-    panel.dumbbell(x, y, ...)
+    panel.xyplot(x, y, type = "l", ...)
     panel.key(c("mutant", "wt"), points = FALSE)
   }
-) + as.layer(
-  xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
-    groups = strain, lwd = 2, panel = function(x, y, ...) {
-      panel.superpose(x, y, ...)
-    }, panel.groups = function(x, y, ...) {
-      panel.smoother(x, y, se = FALSE, span = 0.1, ...)
-    }
-  )
 )
+
+# plot loess fit and error margins
+xyplot(od_corr ~ batchtime_h | factor(sample, unique(sample)), df_OD_hox,
+  groups = strain, as.table = TRUE,
+  layout = c(length(unique(df_OD_hox$sample)), 1),
+  between = list(x = 0.5, y = 0.5),
+  ylab = expression("OD"[720]),
+  par.settings = custom.colorblind(), 
+  xlim = c(-2,47), lwd = 2,
+  scales = list(alternating = FALSE),
+  panel = function(x, y, ...) {
+    panel.grid(h = -1, v = -1, col = grey(0.9))
+    panel.superpose(x, y, ...)
+  }, panel.groups = function(x, y, ...) {
+    panel.smoother(x, y, se = TRUE, span = 0.1, level = 0.99, ...)
+  }
+)
+
 ```
 
 -   maximum growth rate and biomass yield
 
 ```{r, fig.height = 3, fig.width = 6}
 df_mu_hox <- bind_rows(.id = "experiment",
+  df_mu_20211206,
   df_mu_20211208 %>% filter(batchtime_h > 5),
   df_mu_20211214,
   df_mu_20220114,
   df_mu_20220404) %>%
   group_by(sample, experiment, channel_id) %>%
   summarize(mu_max = max(value), .groups = "drop") %>%
-  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX")))
+  mutate(sample = factor(sample, c("WT", "hoxG", "hypB", "hypX", "hoxA", "hoxH")))
 
 df_dcw_hox <- bind_rows(
   df_DCW_20211208 %>% filter(sample != "hoxA"),
   df_DCW_20211214 %>% filter(sample != "hoxA"),
   df_DCW_20220114,
   df_DCW_20220404 %>% filter(sample == "hoxG")) %>%
-  mutate(sample = factor(sample, c("WT", "hoxG", "hoxH", "hoxA", "hypB", "hypX")))
+  mutate(sample = factor(sample, c("WT", "hoxG", "hypB", "hypX", "hoxA", "hoxH")))
 
 plot_barchart(df_mu_hox, "sample", "mu_max",
   ylim = c(0, 0.4), offset = 0.07, xrot = 35) %>%
